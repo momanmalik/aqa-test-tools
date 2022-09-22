@@ -26,7 +26,8 @@ export default class Overview extends Component {
                 (parseInt(passed) / parseInt(executed)) * 100;
 
             const buildName = parentBuildInfo.buildName;
-
+            const buildNumber = parentBuildInfo.buildNum;
+            const result = parentBuildInfo.result;
             let warningMsg = '';
             if (sdkBuilds && sdkBuilds.length === 0) {
                 warningMsg = 'No JDK Builds got triggered in this pipeline. ';
@@ -38,6 +39,23 @@ export default class Overview extends Component {
             return (
                 <div>
                     <div className="overview-header">
+                        <div>
+                            <Link
+                                to={{
+                                    pathname: '/output/test',
+                                }}
+                                style={{
+                                    color:
+                                        result === 'PASSED'
+                                            ? '#2cbe4e'
+                                            : result === 'FAILED'
+                                            ? '#f50'
+                                            : '#DAA520',
+                                }}
+                            >
+                                Build #{buildNumber}
+                            </Link>
+                        </div>{' '}
                         <a
                             href={parentBuildInfo.buildUrl}
                             target="_blank"
