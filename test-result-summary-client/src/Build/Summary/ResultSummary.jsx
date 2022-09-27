@@ -21,6 +21,37 @@ const hcvalues = {
     ],
 };
 
+const checkChildBuilds = (builds, sdkBuilds) => {
+    console.log('bbb,', builds, sdkBuilds);
+    for (let i = 0; i < builds.length; i++) {
+        if (builds[i].status != 'Done') {
+            return 'PROGRESSING';
+        } else {
+            if (builds[i].buildResult == 'FAILIURE') {
+                return 'FAILIURE';
+            } else if (builds[i].buildResult == 'UNSTABLE') {
+                console.log('done');
+                return 'UNSTABLE';
+            }
+        }
+    }
+
+    for (let i = 0; i < sdkBuilds.length; i++) {
+        if (sdkBuilds[i].status != 'Done') {
+            return 'PROGRESSING';
+        } else {
+            if (sdkBuilds[i].buildResult == 'FAILIURE') {
+                return 'FAILIURE';
+            } else if (sdkBuilds[i].buildResult == 'UNSTABLE') {
+                console.log('done');
+                return 'UNSTABLE';
+            }
+        }
+    }
+
+    return 'SUCCESS';
+};
+
 export default class ResultSummary extends Component {
     state = {
         selectedPlatforms: [],
@@ -268,6 +299,7 @@ export default class ResultSummary extends Component {
             allJdkVersions: jdkVersionOpts,
             selectedJdkImpls: jdkImplOpts,
             allJdkImpls: jdkImplOpts,
+            builds,
             sdkBuilds,
             javaVersion,
         });
@@ -284,6 +316,7 @@ export default class ResultSummary extends Component {
             allJdkImpls,
             summary,
             parentBuildInfo,
+            builds,
             sdkBuilds,
             javaVersion,
         } = this.state;
@@ -297,6 +330,7 @@ export default class ResultSummary extends Component {
                         id={parentId}
                         parentBuildInfo={parentBuildInfo}
                         summary={summary}
+                        builds={builds}
                         sdkBuilds={sdkBuilds}
                         javaVersion={javaVersion}
                     />

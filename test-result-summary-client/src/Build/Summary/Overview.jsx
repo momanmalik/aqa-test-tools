@@ -1,6 +1,14 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Divider, Row, Col, Tooltip } from 'antd';
+import {
+    CheckOutlined,
+    CloseOutlined,
+    InfoOutlined,
+    LoadingOutlined,
+    QuestionCircleOutlined,
+    ApartmentOutlined,
+} from '@ant-design/icons';
 import { params } from '../../utils/query';
 import moment from 'moment';
 import BuildLink from '../BuildLink';
@@ -11,7 +19,7 @@ const DAY_FORMAT = 'MMM DD YYYY, hh:mm a';
 
 export default class Overview extends Component {
     render() {
-        const { id, parentBuildInfo, summary, sdkBuilds, javaVersion } =
+        const { id, parentBuildInfo, summary, builds, sdkBuilds, javaVersion } =
             this.props;
         if (id && parentBuildInfo) {
             const {
@@ -27,7 +35,9 @@ export default class Overview extends Component {
 
             const buildName = parentBuildInfo.buildName;
             const buildNumber = parentBuildInfo.buildNum;
-            const result = parentBuildInfo.result;
+            const childBuildResult = checkChildBuilds(builds, sdkBuilds);
+            const result = parentBuildInfo.buildResult;
+            console.log('b', builds, sdkBuilds);
             let warningMsg = '';
             if (sdkBuilds && sdkBuilds.length === 0) {
                 warningMsg = 'No JDK Builds got triggered in this pipeline. ';
@@ -36,26 +46,79 @@ export default class Overview extends Component {
                 warningMsg +=
                     'No AQA Test Builds got triggered in this pipeline. ';
             }
-            return (
-                <div>
-                    <div className="overview-header">
+
+            const renderFvTestBuild = (value) => {
+                console.log(value);
+                if (value) {
+                    let icon = '';
+                    if (value == 'PROGRESSING') {
+                        icon = (
+                            <LoadingOutlined
+                                style={{ fontSize: 16, color: '#DAA520' }}
+                            />
+                        );
+                    } else if (value === 'SUCCESS') {
+                        icon = (
+                            <CheckOutlined
+                                style={{ fontSize: 16, color: '#2cbe4e' }}
+                            />
+                        );
+                    } else if (value === 'FAILURE') {
+                        icon = (
+                            <CloseOutlined
+                                style={{ fontSize: 16, color: '#f50' }}
+                            />
+                        );
+                    } else {
+                        icon = (
+                            <InfoOutlined
+                                style={{ fontSize: 16, color: '#f50' }}
+                            />
+                        );
+                    }
+                    return (
                         <div>
+                            <Tooltip title="Build tree">
+                                <Link
+                                    to={{
+                                        pathname: '/buildTreeView',
+                                        search: params({ parentId: value._id }),
+                                    }}
+                                >
+                                    <ApartmentOutlined />
+                                </Link>
+                            </Tooltip>
                             <Link
                                 to={{
-                                    pathname: '/output/test',
+                                    pathname: '/buildDetail',
+                                    search: params({ parentId: value._id }),
                                 }}
                                 style={{
                                     color:
-                                        result === 'PASSED'
+                                        value === 'SUCCESS'
                                             ? '#2cbe4e'
-                                            : result === 'FAILED'
+                                            : value === 'FAILURE'
                                             ? '#f50'
                                             : '#DAA520',
                                 }}
                             >
-                                Build #{buildNumber}
+                                {' '}
+                                Build #{value.buildNum}{' '}
+                                <Tooltip title={value.buildResult}>
+                                    {icon}
+                                </Tooltip>
                             </Link>
-                        </div>{' '}
+                            <br />
+                        </div>
+                    );
+                }
+                return null;
+            };
+
+            return (
+                <div>
+                    <div className="overview-header">
+                        <div>{renderFvTestBuild(childBuildResult)}</div>{' '}
                         <a
                             href={parentBuildInfo.buildUrl}
                             target="_blank"
